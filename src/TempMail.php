@@ -287,11 +287,11 @@ class TempMail
     /**
      * Get available domains
      *
-     * @return  array|null
+     * @return  array
      */
-    public function getDomains(): ?array
+    public function getDomains(): array
     {
-        return (!empty($this->domains) ? $this->domains : null);
+        return (!empty($this->domains) ? $this->domains : []);
     }
     
     /**
