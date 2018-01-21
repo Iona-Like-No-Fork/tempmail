@@ -1,0 +1,31 @@
+{
+  "name": "leRisen/tempmail",
+  "type": "library",
+  "version": "1.0",
+  "license": "MIT",
+  "homepage": "https://github.com/leRisen/tempmail",
+  "description": "PHP class for temp-mail.org API",
+  "keywords": [
+    "php",
+    "api",
+    "temp-mail",
+    "temp-mail.org"
+  ],
+  "authors": [
+    {
+      "name": "leRisen",
+      "email": "lemmas.online@gmail.com",
+      "homepage": "https://github.com/leRisen",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.1.0",
+    "guzzlehttp/guzzle": "~6.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "leRisen\\tempmail\\": "src"
+    }
+  }
+}
