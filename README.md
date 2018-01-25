@@ -1,4 +1,12 @@
 # tempmail [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
+
+<p align="center">
+<img src="https://img.shields.io/packagist/php-v/le-risen/tempmail.svg?style=flat-square" alt="PHP"></a>
+<img src="https://poser.pugx.org/le-risen/tempmail/v/stable.svg" alt="Version"></a>
+<img src="https://poser.pugx.org/le-risen/tempmail/license.svg" alt="License"></a>
+<img src="https://img.shields.io/github/last-commit/leRisen/tempmail/master.svg?style=flat-square" alt="Last commit"></a>
+</p>
+
 a class for work with [api temp-mail.org](https://market.mashape.com/Privatix/temp-mail)
 
 ## Table of Contents
@@ -28,9 +36,9 @@ use leRisen\tempmail\TempMail;
 /*
     'qwerty' - mashape application key
     'gebi' - login
-    'endrix.org' - domain
+    '@endrix.org' - domain
 */
-$api = new TempMail('qwerty', 'gebi', 'endrix.org');
+$api = new TempMail('qwerty', 'gebi', '@endrix.org');
 
 $domains = $api->listDomains();
 
@@ -87,6 +95,9 @@ Generate random login with $length (**without md5 hash**)
 
 ### `getRandomDomain()`
 Get random domain from the domains list
+
+### `temporaryMail($email)`
+Checks whether the mail is temporary
 
 ## License
 

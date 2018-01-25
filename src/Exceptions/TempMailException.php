@@ -4,7 +4,7 @@
  * The PHP exception class for temp-mail.
  * @author Miroslav Lepichev <lemmas.online@gmail.com>
  * @link https://github.com/leRisen/tempmail
- * @version 1.0
+ * @version 1.1
  * @license MIT
  */
 
