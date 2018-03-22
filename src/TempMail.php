@@ -1,27 +1,36 @@
 <?php
 
 /**
- * The PHP class for temp-mail.org
+ * This file is part of package le-risen/tempmail.
+ *
  * @author Miroslav Lepichev <lemmas.online@gmail.com>
- * @link https://github.com/leRisen/tempmail
- * @version 1.1
- * @license MIT
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace leRisen\tempmail;
 
 use GuzzleHttp\Client as HttpClient;
 
+use leRisen\tempmail\Constants\{
+    Settings,
+    Methods,
+    Auxiliary
+};
+
 use leRisen\tempmail\Exceptions\TempMailException;
 
-class TempMail
+/**
+ * Class TempMail
+ * @package leRisen\tempmail
+ * @version 1.2
+ */
+class TempMail implements
+    Settings,
+    Methods,
+    Auxiliary
 {
-    /**
-     * API Settings
-     */
-    const API_URL = 'https://privatix-temp-mail-v1.p.mashape.com/request/';
-    const API_TIMEOUT = 15.0;
-    
     /**
      * Login for mail
      *
@@ -72,30 +81,30 @@ class TempMail
      * @param   string|null $domain
      * @throws  TempMailException
      */
-    public function __construct(string $mashapeKey, string $login = null, string $domain = null)
+    public function __construct($mashapeKey, $login = null, $domain = null)
     {
         /*
          * Checking for load cURL to avoid conflicts
          */
-        if (extension_loaded('curl')) {
+        if (extension_loaded(Auxiliary::NEEDLE_EXTENSION)) {
             $this->client = new HttpClient([
-                'base_uri' => self::API_URL,
-                'timeout' => self::API_TIMEOUT,
-                'http_errors' => false, // disable 4xx and 5xx responses
+                'base_uri' => Settings::API_URL,
+                'timeout' => Settings::API_TIMEOUT,
+                'http_errors' => Settings::API_HTTP_ERRORS, // disable 4xx and 5xx responses
             ]);
             
-            $this->mashapeKey = $mashapeKey;
+            $this->setMashapeKey($mashapeKey);
             
             $this->domainsList(); // receives a list of domains
             
             $this->setEmail($login, $domain);
         } else {
-            throw new TempMailException('The curl PHP extension is required');
+            throw new TempMailException(Auxiliary::MSG_EXTENSION_REQUIRED);
         }
     }
     
     /**
-     * Executes request on link
+     * Send inquiry by reference
      *
      * @param   string $url
      * @return  array
@@ -104,26 +113,37 @@ class TempMail
     private function sendRequest(string $url): array
     {
         $response = $this->client->request(
-            'GET', $url,
+            Settings::API_DISPATCH_METHOD, $url,
             [
                 'headers' => [
                     'X-Mashape-Key' => $this->getMashapeKey(),
-                    'Accept' => 'application/json'
+                    'Accept' => Settings::API_HEADER_ACCEPT,
                 ]
             ]
         );
         
-        $result = json_decode((string)$response->getBody(), true);
+        $answer = json_decode((string)$response->getBody(), true);
         
+        $this->checkErrors($answer);
+        
+        return $answer;
+    }
+    
+    /**
+     * Checking the result for errors
+     *
+     * @param   array|false $result
+     * @throws  TempMailException
+     */
+    private function checkErrors($result)
+    {
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new TempMailException('Error during decoding JSON: ' . json_last_error_msg());
+            throw new TempMailException(Auxiliary::MSG_ERROR_JSON . json_last_error_msg());
         } elseif (!is_array($result)) {
-            throw new TempMailException('It was expected that the output would be an array');
+            throw new TempMailException(Auxiliary::MSG_NOT_ARRAY);
         } elseif (isset($result['message'])) {
             throw new TempMailException($result['message']);
         }
-        
-        return $result;
     }
     
     /**
@@ -142,11 +162,40 @@ class TempMail
      * Search domain in domains list
      *
      * @param   string $domain
+     * @param   array $domains
      * @return  bool
      */
-    private function searchDomain(string $domain): bool
+    private function searchDomain(string $domain, array $domains = []): bool
     {
-        return in_array($domain, $this->getDomains());
+        return in_array($domain, empty($domains) ? $this->getDomains() : $domains);
+    }
+    
+    /**
+     * Generate random login
+     *
+     * @param   int $length (max 32)
+     * @return  string
+     */
+    private function generateRandomLogin(int $length): string
+    {
+        return substr(md5(mt_rand()), 0, $length);
+    }
+    
+    /**
+     * Get random domain from the domains list
+     *
+     * @return  string
+     * @throws  TempMailException
+     */
+    private function getRandomDomain(): string
+    {
+        $domains = $this->getDomains();
+        
+        if (!empty($domains)) {
+            return $domains[$rand = array_rand($domains)];
+        } else {
+            throw new TempMailException(Auxiliary::MSG_NOT_GET_DOMAIN);
+        }
     }
     
     /**
@@ -158,10 +207,10 @@ class TempMail
      */
     private function validateLogin(string $login): string
     {
-        if (preg_match('/^[a-zA-Z0-9]+$/', $login)) {
+        if (preg_match(Auxiliary::REGEX_LOGIN, $login)) {
             return $login;
         } else {
-            throw new TempMailException('Login must contain cyrillic (without symbols)');
+            throw new TempMailException(Auxiliary::MSG_NOT_VALID_LOGIN);
         }
     }
     
@@ -174,56 +223,29 @@ class TempMail
      */
     private function validateDomain(string $domain): string
     {
-        if ($this->searchDomain($domain)) {
+        if ($isFound = $this->searchDomain($domain, $this->getDomains())) {
             return $domain;
         } else {
-            throw new TempMailException('Domain not found in domain lists');
+            throw new TempMailException(Auxiliary::MSG_NOT_FOUND_DOMAIN);
         }
     }
     
     /**
-     * Checks whether the mail is temporary
+     * Checks if the domain belongs to the mail
      *
      * @param   string $email
+     * @param   array $domains
      * @return  bool
      * @throws  TempMailException
      */
-    public function temporaryMail(string $email): bool
+    public function domainBelongs(string $email, array $domains = []): bool
     {
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $domain = substr($email, strpos($email, '@'), -1);
+            $domain = substr($email, strpos($email, '@'));
             
-            return $this->searchDomain($domain);
+            return $result = $this->searchDomain($domain, $domains);
         } else {
-            throw new TempMailException('The transmitted mail address does not match the format');
-        }
-    }
-    
-    /**
-     * Generate random login
-     *
-     * @param   int $length (max 32)
-     * @return  string|null
-     */
-    public function generateRandomLogin(int $length): ?string
-    {
-        return $length <= 32 ? substr(md5(mt_rand()), 0, $length) : null;
-    }
-    
-    /**
-     * Get random domain from the domains list
-     *
-     * @return  string
-     * @throws  TempMailException
-     */
-    public function getRandomDomain(): string
-    {
-        $domains = $this->getDomains();
-        
-        if (!empty($domains)) {
-            return $domains[$rand = array_rand($domains)];
-        } else {
-            throw new TempMailException('Failed to get domain');
+            throw new TempMailException(Auxiliary::MSG_ERROR_FORMAT_EMAIL);
         }
     }
     
@@ -237,7 +259,7 @@ class TempMail
      */
     public function setEmail(string $login = null, string $domain = null): self
     {
-        $this->login = empty($login) ? $this->generateRandomLogin(22) : $this->validateLogin($login);
+        $this->login = empty($login) ? $this->generateRandomLogin(rand(5, 32)) : $this->validateLogin($login);
         
         $this->domain = empty($domain) ? $this->getRandomDomain() : $this->validateDomain($domain);
         
@@ -273,9 +295,9 @@ class TempMail
      * Get full email
      *
      * @param   bool $md5
-     * @return  string
+     * @return  string|null
      */
-    public function getEmail(bool $md5): string
+    public function getEmail(bool $md5): ?string
     {
         return $md5 ? md5($this->email) : $this->email;
     }
@@ -320,7 +342,7 @@ class TempMail
     {
         $email = $this->getEmail(true);
         
-        $address = $this->getApiUrl('mail', $email);
+        $address = $this->getApiUrl(Methods::MESSAGES, $email);
         
         return $this->sendRequest($address);
     }
@@ -334,7 +356,7 @@ class TempMail
      */
     public function message(string $messageID): array
     {
-        $address = $this->getApiUrl('one_mail', $messageID);
+        $address = $this->getApiUrl(Methods::MESSAGE, $messageID);
         
         return $this->sendRequest($address);
     }
@@ -348,7 +370,7 @@ class TempMail
      */
     public function messageSource(string $messageID): array
     {
-        $address = $this->getApiUrl('source', $messageID);
+        $address = $this->getApiUrl(Methods::SOURCE, $messageID);
         
         return $this->sendRequest($address);
     }
@@ -362,7 +384,7 @@ class TempMail
      */
     public function messageAttachments(string $messageID): array
     {
-        $address = $this->getApiUrl('attachments', $messageID);
+        $address = $this->getApiUrl(Methods::ATTACHMENTS, $messageID);
         
         return $this->sendRequest($address);
     }
@@ -376,7 +398,7 @@ class TempMail
      */
     public function deleteMessage(string $messageID): array
     {
-        $address = $this->getApiUrl('delete', $messageID);
+        $address = $this->getApiUrl(Methods::DELETE, $messageID);
         
         return $this->sendRequest($address);
     }
@@ -389,7 +411,7 @@ class TempMail
      */
     public function domainsList(): array
     {
-        $address = $this->getApiUrl('domains');
+        $address = $this->getApiUrl(Methods::DOMAINS);
         
         return $this->domains = $this->sendRequest($address);
     }

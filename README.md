@@ -1,21 +1,19 @@
 # tempmail [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
 
 <p align="center">
-<img src="https://img.shields.io/packagist/php-v/le-risen/tempmail.svg?style=flat-square" alt="PHP"></a>
+<img src="https://img.shields.io/packagist/php-v/le-risen/tempmail.svg" alt="PHP"></a>
 <img src="https://poser.pugx.org/le-risen/tempmail/v/stable.svg" alt="Version"></a>
 <img src="https://poser.pugx.org/le-risen/tempmail/license.svg" alt="License"></a>
-<img src="https://img.shields.io/github/last-commit/leRisen/tempmail/master.svg?style=flat-square" alt="Last commit"></a>
+<img src="https://img.shields.io/github/last-commit/leRisen/tempmail/master.svg" alt="Last commit"></a>
 </p>
 
-a class for work with [api temp-mail.org](https://market.mashape.com/Privatix/temp-mail)
+a package for work with [api temp-mail.org](https://market.mashape.com/Privatix/temp-mail)
 
 ## Table of Contents
 - [Requirements](#requirements)
 - [Install](#install)
-- [Example](#example)
+- [Sample](#sample)
 - [Functions](#functions)
-- [Helpers](#helpers)
-- [License](#license)
 
 ## Requirements
 - PHP 7.1+ (with enabled cURL)
@@ -28,7 +26,7 @@ Run this command in console:
 composer require leRisen/tempmail
 ```
 
-## Example
+## Sample
 
 ```php
 use leRisen\tempmail\TempMail;
@@ -40,7 +38,11 @@ use leRisen\tempmail\TempMail;
 */
 $api = new TempMail('qwerty', 'gebi', '@endrix.org');
 
-$domains = $api->listDomains();
+/*
+    Domains are obtained when an instance of a class is created
+    Therefore, we are already outputting domains
+*/
+$domains = $api->getDomains();
 
 foreach ($domains as $domain) {
 	echo $domain;
@@ -49,56 +51,153 @@ foreach ($domains as $domain) {
 
 ## Functions
 
-### `setEmail($login, $domain)`
-Set new login and domain
+### Checks if the domain belongs to the mail
 
-### `setMashapeKey($key)`
-Set mashape key
+```php
+domainBelongs($email, $domains)
+```
 
-### `getEmail(false)`
-Get full email (with md5 - true)
+ - `$email` (string) - mail for verification
+ - `$domains` (array) - list of domains
+ - return `bool`
+ 
+Example:
+```php
+$domains = [
+    '@example.com'
+];
 
-### `getLogin()`
-Get current login for mail
+$api->domainBelongs(
+    'test@example.com',
+    $domains
+); // true
+```
 
-### `getDomain()`
-Get current domain for mail
+*If the domains are not transferred, then are used the received - `domainsList()`*
 
-### `getDomains()`
-Get available domains
+### Set new login and domain
 
-### `getMashapeKey()`
-Get mashape key
+```php
+setEmail($login, $domain)
+```
+ - `$login` (string)
+ - `$domain` (string)
+ - return `self`
+ 
+Example:
+```php
+$api->setEmail(
+    'test',
+    '@example.com'
+);
+```
+ 
+*If one of the arguments was not passed, then it will be `automatically generated`.*
+ 
+### Set mashape key
 
-### `messagesList()`
-Returns messages list
+```php
+setMashapeKey($key)
+```
+ - `$key` (string) - mashape api key
+ - return `self`
+ 
+Example:
+```php
+$api->setMashapeKey('qwerty');
+```
+  
+### Get full email
 
-### `message($messageID)`
-Returns message
+```php
+getEmail($md5)
+```
+ - `$md5` (bool) - with(out) md5 hash
+ - return `string`
+ 
+Example:
+```php
+$api->getEmail(false); // test@example.com
+```
 
-### `messageSource($messageID)`
-Returns message source
+### Get current login for mail
 
-### `messageAttachments($messageID)`
-Returns message attachments
+```php
+getLogin()
+```
+ - return `string`
+ 
+Example:
+```php
+$api->getLogin(); // test
+```
 
-### `deleteMessage($messageID)`
-Delete message
+### Get current domain for mail
 
-### `domainsList()`
-Returns domain list
+```php
+getDomain()
+```
+ - return `string`
+ 
+Example:
+```php
+$api->getDomain(); // @example.com
+```
 
-## Helpers
+### Get mashape key
 
-### `generateRandomLogin($length)`
-Generate random login with $length (**without md5 hash**)
+```php
+getMashapeKey()
+```
+ - return `string`
 
-### `getRandomDomain()`
-Get random domain from the domains list
+Example:
+```php
+$api->getMashapeKey(); // qwerty
+```
 
-### `temporaryMail($email)`
-Checks whether the mail is temporary
+### Get available domains
 
-## License
+```php
+getDomains()
+```
+ - return `array`
 
-[MIT](https://tldrlegal.com/license/mit-license)
+### Returns messages list
+
+```php
+messagesList()
+```
+ - return `array`
+
+### Returns domain list
+
+```php
+domainsList()
+```
+ - return `array`
+
+### Message
+
+```php
+// Returns message
+message($messageID)
+```
+
+```php
+// Returns message source
+messageSource($messageID)
+```
+
+```php
+// Return message attachments
+messageAttachments($messageID)
+```
+
+```php
+// Delete message
+deleteMessage($messageID)
+```
+ - `$messageID` (string) - md5 unique identifier
+ - return `array`
+ 
