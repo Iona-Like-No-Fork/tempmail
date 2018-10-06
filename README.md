@@ -161,7 +161,7 @@ $api->getMashapeKey(); // qwerty
 ```php
 getDomains()
 ```
- - return `TempMailApiRequest`
+ - return `array`
 
 ### Returns messages list
 
