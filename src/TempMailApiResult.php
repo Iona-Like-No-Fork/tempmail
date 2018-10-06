@@ -13,11 +13,11 @@ namespace leRisen\tempmail;
 
 class TempMailApiResult
 {
-    public $success         = false;
-    public $error           = false;
-    
-    public $error_msg       = null;
-    public $response        = null;
+    public $success = false;
+    public $error = false;
+
+    public $error_msg = null;
+    public $response = null;
 
     public function isSuccess(): bool
     {

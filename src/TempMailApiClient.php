@@ -11,55 +11,53 @@
 
 namespace leRisen\tempmail;
 
-use leRisen\tempmail\Enums\{
-    TempMailAuxiliary,
-    TempMailMethods
-};
-
+use leRisen\tempmail\Enums\TempMailAuxiliary;
+use leRisen\tempmail\Enums\TempMailMethods;
 use leRisen\tempmail\Exceptions\TempMailClientException;
 
 class TempMailApiClient
 {
     /**
-     * Login for mail
+     * Login for mail.
      *
      * @var string
      */
     private $login;
-    
+
     /**
-     * Domain for mail
+     * Domain for mail.
      *
      * @var string
      */
     private $domain;
-    
+
     /**
-     * Available domains
+     * Available domains.
      *
      * @var array
      */
     private $domains;
-    
+
     /**
-     * Full email with login and domain
+     * Full email with login and domain.
      *
      * @var string
      */
     private $email;
 
     /**
-     * Mashape application key
+     * Mashape application key.
      *
      * @var string
      */
     private $mashapeKey;
-    
+
     /**
-     * Constructor
+     * Constructor.
      *
-     * @param   string $mashapeKey
-     * @throws  TempMailClientException
+     * @param string $mashapeKey
+     *
+     * @throws TempMailClientException
      */
     public function __construct($mashapeKey)
     {
@@ -72,36 +70,40 @@ class TempMailApiClient
             throw new TempMailClientException(TempMailAuxiliary::MSG_EXTENSION_REQUIRED);
         }
     }
-    
+
     /**
-     * Search domain in domains list
+     * Search domain in domains list.
      *
-     * @param   string $domain
-     * @param   array $domains
-     * @return  bool
+     * @param string $domain
+     * @param array  $domains
+     *
+     * @return bool
      */
     private function searchDomain(string $domain, array $domains = []): bool
     {
         return in_array($domain, empty($domains) ? self::getDomains() : $domains);
     }
-    
+
     /**
-     * Generate random login
+     * Generate random login.
      *
-     * @param   int $length (max 32)
-     * @return  string
+     * @param int $length (max 32)
+     *
+     * @return string
      */
     private function generateRandomLogin(int $length): string
     {
         return substr(md5(mt_rand()), 0, $length);
     }
-    
+
     /**
-     * Get random domain from the domains list
+     * Get random domain from the domains list.
      *
-     * @param   array $domains
-     * @return  string
-     * @throws  TempMailClientException
+     * @param array $domains
+     *
+     * @throws TempMailClientException
+     *
+     * @return string
      */
     private function getRandomDomain(array $domains): string
     {
@@ -111,13 +113,15 @@ class TempMailApiClient
             throw new TempMailClientException(TempMailAuxiliary::MSG_NOT_GET_DOMAIN);
         }
     }
-    
+
     /**
-     * Validate login
+     * Validate login.
      *
-     * @param   string $login
-     * @return  string
-     * @throws  TempMailClientException
+     * @param string $login
+     *
+     * @throws TempMailClientException
+     *
+     * @return string
      */
     private function validateLogin(string $login): string
     {
@@ -127,13 +131,15 @@ class TempMailApiClient
             throw new TempMailClientException(TempMailAuxiliary::MSG_NOT_VALID_LOGIN);
         }
     }
-    
+
     /**
-     * Validate domain
+     * Validate domain.
      *
-     * @param   string $domain
-     * @return  string
-     * @throws  TempMailClientException
+     * @param string $domain
+     *
+     * @throws TempMailClientException
+     *
+     * @return string
      */
     private function validateDomain(string $domain): string
     {
@@ -145,113 +151,120 @@ class TempMailApiClient
     }
 
     /**
-     * Create request
-     * 
-     * @param   string $method
-     * @param   string|null $identifier
-     * @return  TempMailApiRequest
+     * Create request.
+     *
+     * @param string      $method
+     * @param string|null $identifier
+     *
+     * @return TempMailApiRequest
      */
     public function createRequest(string $method, string $identifier = null): TempMailApiRequest
     {
         return new TempMailApiRequest($this->getMashapeKey(), $method, $identifier);
     }
-    
+
     /**
-     * Checks if the domain belongs to the mail
+     * Checks if the domain belongs to the mail.
      *
-     * @param   string $email
-     * @param   array $domains
-     * @return  bool
-     * @throws  TempMailClientException
+     * @param string $email
+     * @param array  $domains
+     *
+     * @throws TempMailClientException
+     *
+     * @return bool
      */
     public function domainBelongs(string $email, array $domains = []): bool
     {
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $domain = substr($email, strpos($email, '@'));
-            
+
             return $result = $this->searchDomain($domain, $domains);
         } else {
             throw new TempMailClientException(TempMailAuxiliary::MSG_ERROR_FORMAT_EMAIL);
         }
     }
-    
+
     /**
-     * Set new login and domain
+     * Set new login and domain.
      *
-     * @param   string|null $login
-     * @param   string|null $domain
-     * @return  TempMailApiClient
-     * @throws  TempMailClientException
+     * @param string|null $login
+     * @param string|null $domain
+     *
+     * @throws TempMailClientException
+     *
+     * @return TempMailApiClient
      */
     public function setEmail(string $login = null, string $domain = null): self
     {
         $this->login = empty($login) ? $this->generateRandomLogin(rand(5, 32)) : $this->validateLogin($login);
-        
+
         $this->domain = empty($domain) ? $this->getRandomDomain(self::getDomains()) : $this->validateDomain($domain);
-        
-        $this->email = $this->login . '' . $this->domain;
-        
+
+        $this->email = $this->login.''.$this->domain;
+
         return $this;
     }
 
     /**
-     * Set mashape key
+     * Set mashape key.
      *
-     * @param   string $key
-     * @return  TempMailApiClient
+     * @param string $key
+     *
+     * @return TempMailApiClient
      */
     public function setMashapeKey(string $key): self
     {
         $this->mashapeKey = $key;
-        
+
         return $this;
     }
-    
+
     /**
-     * Get mashape key
+     * Get mashape key.
      *
-     * @return  string|null
+     * @return string|null
      */
     public function getMashapeKey(): ?string
     {
         return $this->mashapeKey;
     }
-    
+
     /**
-     * Get full email
+     * Get full email.
      *
-     * @param   bool $md5
-     * @return  string|null
+     * @param bool $md5
+     *
+     * @return string|null
      */
     public function getEmail(bool $md5): ?string
     {
         return $md5 ? md5($this->email) : $this->email;
     }
-    
+
     /**
-     * Get current login for mail
+     * Get current login for mail.
      *
-     * @return  string|null
+     * @return string|null
      */
     public function getLogin(): ?string
     {
         return $this->login;
     }
-    
+
     /**
-     * Get current domain for mail
+     * Get current domain for mail.
      *
-     * @return  string|null
+     * @return string|null
      */
     public function getDomain(): ?string
     {
         return $this->domain;
     }
-    
+
     /**
-     * Get available domains
+     * Get available domains.
      *
-     * @return  array
+     * @return array
      */
     public function getDomains(): array
     {
@@ -260,58 +273,62 @@ class TempMailApiClient
         $result = $request->execute();
 
         $domains = $result->success ? $result->response : [];
-        
+
         return empty($this->domains) ? $domains : $this->domains;
     }
 
     /**
-     * Returns messages list
+     * Returns messages list.
      *
-     * @return  TempMailApiRequest
+     * @return TempMailApiRequest
      */
     public function messagesList(): TempMailApiRequest
     {
         return $this->createRequest(TempMailMethods::MESSAGES, $this->getEmail(true));
     }
-    
+
     /**
-     * Returns message
+     * Returns message.
      *
-     * @param   string $messageID
-     * @return  TempMailApiRequest
+     * @param string $messageID
+     *
+     * @return TempMailApiRequest
      */
     public function message(string $messageID): TempMailApiRequest
     {
         return $this->createRequest(TempMailMethods::MESSAGE, $messageID);
     }
-    
+
     /**
-     * Returns message source
+     * Returns message source.
      *
-     * @param   string $messageID
-     * @return  TempMailApiRequest
+     * @param string $messageID
+     *
+     * @return TempMailApiRequest
      */
     public function messageSource(string $messageID): TempMailApiRequest
     {
         return $this->createRequest(TempMailMethods::SOURCE, $messageID);
     }
-    
+
     /**
-     * Returns message attachments
+     * Returns message attachments.
      *
-     * @param   string $messageID
-     * @return  TempMailApiRequest
+     * @param string $messageID
+     *
+     * @return TempMailApiRequest
      */
     public function messageAttachments(string $messageID): TempMailApiRequest
     {
         return $this->createRequest(TempMailMethods::ATTACHMENTS, $messageID);
     }
-    
+
     /**
-     * Delete message
+     * Delete message.
      *
-     * @param   string $messageID
-     * @return  TempMailApiRequest
+     * @param string $messageID
+     *
+     * @return TempMailApiRequest
      */
     public function deleteMessage(string $messageID): TempMailApiRequest
     {
@@ -319,9 +336,9 @@ class TempMailApiClient
     }
 
     /**
-     * Returns domains list
-     * 
-     * @return  TempMailApiRequest
+     * Returns domains list.
+     *
+     * @return TempMailApiRequest
      */
     public function domainsList(): TempMailApiRequest
     {

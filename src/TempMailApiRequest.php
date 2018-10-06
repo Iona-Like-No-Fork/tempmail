@@ -11,10 +11,8 @@
 
 namespace leRisen\tempmail;
 
-use leRisen\tempmail\Enums\TempMailAuxiliary;
-
 use GuzzleHttp\Client as HttpClient;
-
+use leRisen\tempmail\Enums\TempMailAuxiliary;
 use Psr\Http\Message\ResponseInterface;
 
 class TempMailApiRequest
@@ -34,7 +32,7 @@ class TempMailApiRequest
     /**
      * @var string
      */
-    private $mashapeKey;    
+    private $mashapeKey;
 
     /**
      * @var string
@@ -50,29 +48,29 @@ class TempMailApiRequest
      * @var bool
      */
     private $ignoreError;
-    
+
     /**
      * @callable
      */
     private $successHandler;
-    
+
     /**
      * @callable
      */
     private $errorHandler;
 
     /**
-     * Constructor
+     * Constructor.
      *
-     * @param   string $mashapeKey
-     * @param   string $method
-     * @param   string|null $identifier
-     */    
+     * @param string      $mashapeKey
+     * @param string      $method
+     * @param string|null $identifier
+     */
     public function __construct($mashapeKey, $method, $identifier = null)
     {
         $this->client = new HttpClient([
-            'base_uri' => static::URL,
-            'timeout' => static::CONNECTION_TIMEOUT,
+            'base_uri'    => static::URL,
+            'timeout'     => static::CONNECTION_TIMEOUT,
             'http_errors' => static::HTTP_ERRORS, // disable 4xx and 5xx responses
         ]);
 
@@ -82,19 +80,20 @@ class TempMailApiRequest
     }
 
     /**
-     * Get data from response
-     * 
-     * @param   ResponseInterface $response
-     * @return  TempMailApiResult
+     * Get data from response.
+     *
+     * @param ResponseInterface $response
+     *
+     * @return TempMailApiResult
      */
     private function getResponseData(ResponseInterface $response)
     {
         $result = new TempMailApiResult();
 
-        $data = json_decode((string)$response->getBody(), true);
-        
+        $data = json_decode((string) $response->getBody(), true);
+
         $error = false;
-        
+
         if (!$this->ignoreError) {
             $error = $this->hasError($data);
         }
@@ -105,31 +104,36 @@ class TempMailApiRequest
 
             $handler = $this->errorHandler;
 
-            if ($handler) call_user_func($handler, $error);
+            if ($handler) {
+                call_user_func($handler, $error);
+            }
         } else {
             $result->success = true;
             $result->response = $data;
 
             $handler = $this->successHandler;
 
-            if ($handler) call_user_func($handler, $data);
+            if ($handler) {
+                call_user_func($handler, $data);
+            }
         }
 
         return $result;
     }
-    
+
     /**
-     * Checking the result for error
+     * Checking the result for error.
      *
-     * @param   array|false $result
-     * @return  string|false
+     * @param array|false $result
+     *
+     * @return string|false
      */
     private function hasError($result)
     {
         $error = false;
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $error = TempMailAuxiliary::MSG_ERROR_JSON . json_last_error_msg();
+            $error = TempMailAuxiliary::MSG_ERROR_JSON.json_last_error_msg();
         } elseif (!is_array($result)) {
             $error = TempMailAuxiliary::MSG_NOT_ARRAY;
         } elseif (isset($result['message'])) {
@@ -137,10 +141,10 @@ class TempMailApiRequest
         }
 
         return $error;
-    }  
+    }
 
     /**
-     * Send request by reference
+     * Send request by reference.
      */
     public function execute()
     {
@@ -155,32 +159,34 @@ class TempMailApiRequest
             [
                 'headers' => [
                     'X-Mashape-Key' => $this->mashapeKey,
-                    'Accept' => static::HEADER_ACCEPT,
-                ]
+                    'Accept'        => static::HEADER_ACCEPT,
+                ],
             ]
         );
-        
+
         return $this->getResponseData($response);
     }
 
     /**
-     * Ignore error
+     * Ignore error.
      *
-     * @param  bool $ignore
+     * @param bool $ignore
+     *
      * @return TempMailApiRequest
      */
     public function ignoreError(bool $ignore): self
     {
         $this->ignoreError = $ignore;
-        
+
         return $this;
     }
 
     /**
-     * Set success handler
+     * Set success handler.
      *
-     * @param   callback $func
-     * @return  TempMailApiRequest
+     * @param callable $func
+     *
+     * @return TempMailApiRequest
      */
     public function setSuccessHandler($func): self
     {
@@ -190,10 +196,11 @@ class TempMailApiRequest
     }
 
     /**
-     * Set error handler
+     * Set error handler.
      *
-     * @param   callback $func
-     * @return  TempMailApiRequest
+     * @param callable $func
+     *
+     * @return TempMailApiRequest
      */
     public function setErrorHandler($func): self
     {
