@@ -29,21 +29,21 @@ class TempMailApiBuilder
     private $identifier;
 
     /**
-     * Constructor
+     * Constructor.
      *
-     * @param   string $url
-     * @param   string $method
-     * @param   string|null $identifier
+     * @param string      $url
+     * @param string      $method
+     * @param string|null $identifier
      */
-	public function __construct($url, $method, $identifier = null)
-	{
+    public function __construct($url, $method, $identifier = null)
+    {
         $this->url = $url;
-		$this->method = $method;
-		$this->identifier = $identifier;
+        $this->method = $method;
+        $this->identifier = $identifier;
     }
-    
-	public function build()
-	{
+
+    public function build()
+    {
         $url = $this->url;
         $method = $this->method;
         $identifier = $this->identifier;
@@ -51,5 +51,5 @@ class TempMailApiBuilder
         return sprintf(
             '%s%s%s', $url, $method, is_null($identifier) ? '' : "/id/$identifier"
         );
-	}
+    }
 }

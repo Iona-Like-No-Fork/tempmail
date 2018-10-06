@@ -13,5 +13,4 @@ namespace leRisen\tempmail\Exceptions;
 
 class TempMailClientException extends \Exception
 {
-
 }
