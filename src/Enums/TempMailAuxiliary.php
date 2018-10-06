@@ -9,13 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace leRisen\tempmail\Constants;
+namespace leRisen\tempmail\Enums;
 
-/**
- * Constants Auxiliary
- * @package leRisen\tempmail
- */
-interface Auxiliary
+class TempMailAuxiliary
 {
     const NEEDLE_EXTENSION = 'curl';
     const MSG_EXTENSION_REQUIRED = 'The ' . self::NEEDLE_EXTENSION . ' PHP extension is required';

@@ -1,10 +1,10 @@
 # tempmail [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
 
 <p align="center">
-<img src="https://img.shields.io/packagist/php-v/le-risen/tempmail.svg" alt="PHP"></a>
-<img src="https://poser.pugx.org/le-risen/tempmail/v/stable.svg" alt="Version"></a>
-<img src="https://poser.pugx.org/le-risen/tempmail/license.svg" alt="License"></a>
-<img src="https://img.shields.io/github/last-commit/leRisen/tempmail/master.svg" alt="Last commit"></a>
+    <img src="https://poser.pugx.org/le-risen/tempmail/v/stable.svg" alt="Version">
+    <img src="https://poser.pugx.org/le-risen/tempmail/license.svg" alt="License">
+    <img src="https://img.shields.io/github/last-commit/leRisen/tempmail/master.svg" alt="Last commit">
+    <img src="https://poser.pugx.org/le-risen/tempmail/downloads.svg" alt="Downloads">
 </p>
 
 a package for work with [api temp-mail.org](https://market.mashape.com/Privatix/temp-mail)
@@ -29,24 +29,24 @@ composer require leRisen/tempmail
 ## Sample
 
 ```php
-use leRisen\tempmail\TempMail;
-
 /*
     'qwerty' - mashape application key
-    'gebi' - login
-    '@endrix.org' - domain
 */
-$api = new TempMail('qwerty', 'gebi', '@endrix.org');
+$api = new \leRisen\tempmail\TempMailApiClient('qwerty');
 
-/*
-    Domains are obtained when an instance of a class is created
-    Therefore, we are already outputting domains
-*/
-$domains = $api->getDomains();
+$api->setEmail('gebi', '@endrix.org');
 
-foreach ($domains as $domain) {
-	echo $domain;
-}
+$request = $api->domainsList();
+
+$request->setErrorHandler(function ($error) {
+    var_dump($error);
+});
+
+$request->setSuccessHandler(function ($result) {
+    var_dump($result);
+});
+
+$request->execute();
 ```
 
 ## Functions
@@ -161,21 +161,21 @@ $api->getMashapeKey(); // qwerty
 ```php
 getDomains()
 ```
- - return `array`
+ - return `TempMailApiRequest`
 
 ### Returns messages list
 
 ```php
 messagesList()
 ```
- - return `array`
+ - return `TempMailApiRequest`
 
 ### Returns domain list
 
 ```php
 domainsList()
 ```
- - return `array`
+ - return `TempMailApiRequest`
 
 ### Message
 
@@ -199,5 +199,5 @@ messageAttachments($messageID)
 deleteMessage($messageID)
 ```
  - `$messageID` (string) - md5 unique identifier
- - return `array`
+ - return `TempMailApiRequest`
  

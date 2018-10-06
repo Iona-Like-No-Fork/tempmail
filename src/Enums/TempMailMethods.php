@@ -9,13 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace leRisen\tempmail\Constants;
+namespace leRisen\tempmail\Enums;
 
-/**
- * Constants Methods
- * @package leRisen\tempmail
- */
-interface Methods
+class TempMailMethods
 {
     const MESSAGES = 'mail';
     const MESSAGE = 'one_mail';
