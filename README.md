@@ -1,6 +1,7 @@
 # tempmail [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
 
 <p align="center">
+    <img src="https://travis-ci.org/leRisen/tempmail.svg?branch=master" alt="Build Status">
     <img src="https://poser.pugx.org/le-risen/tempmail/v/stable.svg" alt="Version">
     <img src="https://poser.pugx.org/le-risen/tempmail/license.svg" alt="License">
     <img src="https://img.shields.io/github/last-commit/leRisen/tempmail/master.svg" alt="Last commit">
