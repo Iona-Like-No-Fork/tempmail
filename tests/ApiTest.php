@@ -1,11 +1,10 @@
 <?php
 
-namespace leRisen\tempmail\Tests; 
-
-use PHPUnit\Framework\TestCase;
+namespace leRisen\tempmail\Tests;
 
 use leRisen\tempmail\TempMailApiClient;
 use leRisen\tempmail\TempMailApiResult;
+use PHPUnit\Framework\TestCase;
 
 class ApiTest extends TestCase
 {
@@ -20,7 +19,7 @@ class ApiTest extends TestCase
 
     protected function tearDown()
     {
-        $this->api = NULL;
+        $this->api = null;
     }
 
     public function testCallWithInvalidKey()
