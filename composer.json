@@ -36,9 +36,6 @@
       "leRisen\\tempmail\\Tests\\": "tests/"
     }
   },
-  "scripts": {
-    "test": "phpunit --exclude-group FITS --bootstrap vendor/autoload.php"
-  },
   "config": {
     "preferred-install": "dist",
     "sort-packages": true,
