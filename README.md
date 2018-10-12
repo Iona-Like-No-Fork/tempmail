@@ -164,17 +164,22 @@ getDomains()
 ```
  - return `array`
 
+Example:
+```php
+$api->getDomains(); // ['@endrix.org']
+```
+
 ### Returns messages list
 
 ```php
-messagesList()
+$api->messagesList();
 ```
  - return `TempMailApiRequest`
 
 ### Returns domain list
 
 ```php
-domainsList()
+$api->domainsList();
 ```
  - return `TempMailApiRequest`
 
@@ -182,22 +187,22 @@ domainsList()
 
 ```php
 // Returns message
-message($messageID)
+$api->message($messageID);
 ```
 
 ```php
 // Returns message source
-messageSource($messageID)
+$api->messageSource($messageID);
 ```
 
 ```php
 // Return message attachments
-messageAttachments($messageID)
+$api->messageAttachments($messageID);
 ```
 
 ```php
 // Delete message
-deleteMessage($messageID)
+$api->deleteMessage($messageID);
 ```
  - `$messageID` (string) - md5 unique identifier
  - return `TempMailApiRequest`

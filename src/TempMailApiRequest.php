@@ -50,12 +50,12 @@ class TempMailApiRequest
     private $ignoreError;
 
     /**
-     * @callable
+     * @var callable
      */
     private $successHandler;
 
     /**
-     * @callable
+     * @var callable
      */
     private $errorHandler;
 
@@ -69,7 +69,6 @@ class TempMailApiRequest
     public function __construct($mashapeKey, $method, $identifier = null)
     {
         $this->client = new HttpClient([
-            'base_uri'    => static::URL,
             'timeout'     => static::CONNECTION_TIMEOUT,
             'http_errors' => static::HTTP_ERRORS, // disable 4xx and 5xx responses
         ]);
@@ -90,12 +89,12 @@ class TempMailApiRequest
     {
         $result = new TempMailApiResult();
 
-        $data = json_decode((string) $response->getBody(), true);
+        $json = json_decode((string) $response->getBody(), true);
 
         $error = false;
 
         if (!$this->ignoreError) {
-            $error = $this->hasError($data);
+            $error = $this->hasError($json);
         }
 
         if ($error) {
@@ -109,12 +108,12 @@ class TempMailApiRequest
             }
         } else {
             $result->success = true;
-            $result->response = $data;
+            $result->response = $json;
 
             $handler = $this->successHandler;
 
             if ($handler) {
-                call_user_func($handler, $data);
+                call_user_func($handler, $json);
             }
         }
 
